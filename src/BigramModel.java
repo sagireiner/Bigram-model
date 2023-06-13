@@ -143,7 +143,7 @@ public class BigramModel {
      */
     public boolean isLegalSentence(String sentence) {  //  Q - 8
         if (sentence.equals("")) return true;
-        String[] arrSentence = sentence.split(" ");
+        String[] arrSentence = adjustSentence(sentence);
         if (arrSentence.length == 1) return getWordIndex(arrSentence[0]) != -1;
         int wordIndex = getWordIndex(arrSentence[0]);
         for (int i = 0; i < arrSentence.length - 1; i++) {
@@ -159,11 +159,29 @@ public class BigramModel {
         return true;
     }
 
+    private String[] adjustSentence(String sentence) {
+        List<String> tokens = new ArrayList<>();
+        String[] split = sentence.split("\\s+");
+        for (String token : split) {
+            //convert the token to lowercase and trim trailing spaces and punctuation marks
+            token = token.replaceFirst("^\\p{Punct}*", "")
+                    .replaceFirst("\\p{Punct}*$", "")
+                    .toLowerCase().trim();
+            if (token.length() > 0) {
+                //add non-empty tokens to the list
+                tokens.add(token);
+            }
+        }
+        String[] arrSentence = new String[tokens.size()];
+        arrSentence = tokens.toArray(arrSentence);
+        return arrSentence;
+    }
+
     public double probOfSentence(String sentence) {
         if (!isLegalSentence(sentence)) {
             return 0;
         }
-        String[] arrSentence = sentence.toLowerCase().split(" ");
+        String[] arrSentence = adjustSentence(sentence);
         if (arrSentence.length == 1) {
             return (double) mUnigramCounts.get(getWordIndex(arrSentence[0])) / mVocabulary.size();
         }
@@ -181,7 +199,9 @@ public class BigramModel {
         double[][] mBigramProb1 = new double[mBigramCounts.length][mBigramCounts.length];
         for (int i = 0; i < mVocabulary.size(); i++) {
             for (int j = 0; j < mVocabulary.size(); j++) {
-                double prob = (double) mBigramCounts[i][j] / mUnigramCounts.get(i);
+                double mb = (double) mBigramCounts[i][j];
+                double mu =  mUnigramCounts.get(i);
+                double prob = mb/mu;
                 mBigramProb1[i][j] = prob;
                 }
             }
@@ -265,7 +285,10 @@ public class BigramModel {
     }
 
     public String getClosestWord(String word) { //  Q - 10
-        int wordIndex = getWordIndex(word);
+        int wordIndex = getWordIndex(word.toLowerCase());
+        if (wordIndex == -1) {
+            return null;
+        }
         int[] wordVector = mBigramCounts[wordIndex];
         int indexOfMax = 0;
         double maxCosinemSim = 0;

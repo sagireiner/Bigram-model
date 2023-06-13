@@ -2,8 +2,8 @@
 import java.io.IOException;
 
 public class BigramModelExample {
-    public static final String LOVE_IS_IN_THE_AIR = "resources/love_is_in_the_air.txt";
-    public static final String LOVE_IS_IN_THE_AIR_MODEL_DIR = "resources/LOVE_IS_IN_THE_AIR_MODEL_DIR";
+    public static final String LOVE_IS_IN_THE_AIR = "resources_examples/love_is_in_the_air.txt";
+    public static final String LOVE_IS_IN_THE_AIR_MODEL_DIR = "resources_examples/LOVE_IS_IN_THE_AIR_MODEL_DIR";
     public static void main(String[] args) throws IOException {
         BigramModel sG = new BigramModel();
         sG.initModel(LOVE_IS_IN_THE_AIR);
@@ -11,28 +11,33 @@ public class BigramModelExample {
         System.out.println("done");
 
         System.out.println(sG.getMostFrequentProceeding("love"));
-        System.out.println(sG.getMostFrequentProceeding("is"));
+        System.out.println(sG.getMostFrequentProceeding("children"));
         System.out.println(sG.getMostFrequentProceeding("in"));
 
         System.out.println(sG.getProb("love", "is"));
-        System.out.println(sG.getProb("is", "in"));
-        System.out.println(sG.getProb("in", "the"));
+        System.out.println(sG.getProb("hand", "in"));
+        System.out.println(sG.getProb("we", "the"));
 
-        System.out.println(sG.getClosestWord("love"));
-        System.out.println(sG.getClosestWord("is"));
-        System.out.println(sG.getClosestWord("in"));
+        System.out.println(sG.getClosestWord("Penny"));
+        System.out.println(sG.getClosestWord("nervous"));
+        System.out.println(sG.getClosestWord("close"));
 
-        System.out.println(sG.getMaxProb("love", 2));
-        System.out.println(sG.getMaxProb("is", 1));
-        System.out.println(sG.getMaxProb("in", 3));
+        System.out.println(sG.getMaxProb("every", 0));
+        System.out.println(sG.getMaxProb("game", 0));
+        System.out.println(sG.getMaxProb("play", 0));
 
-        System.out.println(sG.getMaxProbSentence("love", 2));
-        System.out.println(sG.getMaxProbSentence("is", 1));
-        System.out.println(sG.getMaxProbSentence("in", 3));
+        System.out.println(sG.getMaxProbSentence("love", 5));
+        System.out.println(sG.getMaxProbSentence("smell", 5));
+        System.out.println(sG.getMaxProbSentence("penny", 5));
 
+        System.out.println(sG.isLegalSentence("He smiles and walks"));
         System.out.println(sG.isLegalSentence("love is in the air"));
-        System.out.println(sG.probOfSentence("love is in the air"));
-        System.out.println(sG.isLegalSentence("love is in the air love"));
+        System.out.println(sG.isLegalSentence("No, we are not related"));
+
+
+        System.out.println(sG.probOfSentence("He smiles and walks"));
+        System.out.println(sG.probOfSentence("Then the oldest one screams"));
+        System.out.println(sG.probOfSentence("when she is nervous"));
 
         sG.clearModel();
 
