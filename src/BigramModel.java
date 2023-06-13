@@ -2,7 +2,7 @@
 import java.io.*;
 import java.util.*;
 
-public class bigramProject {
+public class BigramModel {
 
     public static final String VOC_FILE_SUFFIX = ".voc";
     public static final String COUNTS_FILE_SUFFIX = ".counts";
@@ -23,7 +23,7 @@ public class bigramProject {
 
     public List<String> buildVocabularyIndex(String fileName) throws IOException {
         File file = new File(fileName);
-        List<String> vocabulary = bigramProject.readAllTokens(file);
+        List<String> vocabulary = BigramModel.readAllTokens(file);
         List<String> vocabulary2 = new ArrayList<>();
         for (String string : vocabulary) {
             if (string.matches("[0-9]+")) {
@@ -44,7 +44,7 @@ public class bigramProject {
     int[][] buildCountsArray(String fileName, List<String> vocabulary) throws IOException {
         int[][] bigramCounts = new int[vocabulary.size()][vocabulary.size()];
         File file = new File(fileName);
-        List<String> tokens = bigramProject.readAllTokens(file);
+        List<String> tokens = BigramModel.readAllTokens(file);
         for (int i = 0; i < tokens.size() - 1; i++) {
             String token1 = tokens.get(i);
             String token2 = tokens.get(i + 1);
