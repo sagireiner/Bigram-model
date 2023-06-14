@@ -5,7 +5,8 @@ import java.util.*;
 public class BigramModel {
 
     public static final String VOC_FILE_SUFFIX = ".voc";
-    public static final String COUNTS_FILE_SUFFIX = ".counts";
+    public static final String BIGRAM_FILE_SUFFIX = ".Bcounts";
+    public static final String UNIGRAM_FILE_SUFFIX = ".Ucounts";
     public static final String SOME_NUM = "some_num";
     public static final int ELEMENT_NOT_FOUND = -1;
     List<String> mVocabulary;
@@ -199,7 +200,7 @@ public class BigramModel {
         double[][] mBigramProb1 = new double[mBigramCounts.length][mBigramCounts.length];
         for (int i = 0; i < mVocabulary.size(); i++) {
             for (int j = 0; j < mVocabulary.size(); j++) {
-                double mb = (double) mBigramCounts[i][j];
+                double mb = mBigramCounts[i][j];
                 double mu =  mUnigramCounts.get(i);
                 double prob = mb/mu;
                 mBigramProb1[i][j] = prob;
@@ -214,43 +215,37 @@ public class BigramModel {
         return mBigramProbs[index1][index2];
     }
 
-    public Map.Entry<String,Double> getMaxProb(String word,int k){
+
+
+    public Map.Entry<String,Double> getKMaxProb(String word){
         int index = getWordIndex(word);
         double max = 0;
-        double prevMax = 0;
         int j = 0;
-        int prevJ = 0;
         for (int i = 0; i < mBigramProbs[index].length; i++) {
             if (mBigramProbs[index][i] > max) {
-                prevMax = max;
-                prevJ = j;
                 max = mBigramProbs[index][i];
                 j = i;
             }
         }
-        AbstractMap.SimpleEntry<String, Double> entry;
-        if (k==0){
-            entry = new AbstractMap.SimpleEntry<>(mVocabulary.get(j), max);
-        }
-        else {
-            entry = new AbstractMap.SimpleEntry<>(mVocabulary.get(prevJ), prevMax);
-        }
-        return entry;
+        return new AbstractMap.SimpleEntry<>(mVocabulary.get(j),max);
     }
 
     public String getMaxProbSentence(String word, int length){
 
-        List<String> sentence = new LinkedList<>();
+        List<String> sentence = new ArrayList<>();
         sentence.add(word);
         String nextWord = word;
         for (int i = 0; i < length; i++) {
-            Map.Entry<String,Double> entry = getMaxProb(nextWord,0);
-            if (sentence.contains(entry.getKey()))
-                entry = getMaxProb(nextWord,1);
+            int m = 1;
+            Map.Entry<String,Double> entry = getKMaxProb(nextWord);
             sentence.add(entry.getKey());
             nextWord = entry.getKey();
         }
-        return sentence.toString();
+        String sentenceString = sentence.toString();
+        sentenceString = sentenceString.replace("[","");
+        sentenceString = sentenceString.replace("]","");
+        sentenceString = sentenceString.replace(",","");
+        return sentenceString;
     }
 
     /*
@@ -311,9 +306,27 @@ public class BigramModel {
      */
     public void saveModel(String fileName) throws IOException{ // Q-3
         BufferedWriter vocFile = createBufferWriter(fileName + VOC_FILE_SUFFIX);
-        BufferedWriter countsFile = createBufferWriter(fileName + COUNTS_FILE_SUFFIX);
+        BufferedWriter bCountsFile = createBufferWriter(fileName + BIGRAM_FILE_SUFFIX);
+        BufferedWriter UCountsFile = createBufferWriter(fileName + UNIGRAM_FILE_SUFFIX);
         writeToVoc(vocFile);
-        writeToCounts(countsFile);
+        writeToBCounts(bCountsFile);
+        writeToUCounts(UCountsFile);
+    }
+
+    private void writeToUCounts(BufferedWriter uCountsFile) {
+        for (int i = 0; i<mUnigramCounts.size();i++){
+            try {
+                uCountsFile.write(i + ":" + mUnigramCounts.get(i));
+                uCountsFile.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            uCountsFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void writeToVoc(BufferedWriter vocFile) throws IOException {
@@ -326,7 +339,7 @@ public class BigramModel {
         vocFile.close();
     }
 
-    private void writeToCounts(BufferedWriter countsFile) throws IOException {
+    private void writeToBCounts(BufferedWriter countsFile) throws IOException {
         for (int j = 0; j<mBigramCounts.length;j++){
             for(int p = 0;p<mBigramCounts[j].length;p++){
                 if(mBigramCounts[j][p]!=0){
@@ -347,11 +360,26 @@ public class BigramModel {
      */
     public void loadModel(String fileName) throws IOException{ // Q - 4
         BufferedReader vocFile = createBufferReader(fileName + VOC_FILE_SUFFIX);
-        BufferedReader countsFile = createBufferReader(fileName + COUNTS_FILE_SUFFIX);
+        BufferedReader bCountsFile = createBufferReader(fileName + BIGRAM_FILE_SUFFIX);
+        BufferedReader uCountsFile = createBufferReader(fileName + UNIGRAM_FILE_SUFFIX);
         loadVoc(vocFile);
-        loadCounts(countsFile);
+        loadCounts(bCountsFile);
+        loadUCounts(uCountsFile);
         this.mBigramProbs = calcBigramProbs();
 
+    }
+
+    private void loadUCounts(BufferedReader uCountsFile) throws IOException {
+        String line;
+        mUnigramCounts = new ArrayList<>();
+        while ((line = uCountsFile.readLine())!= null){
+            Scanner scLine = new Scanner(line);
+            scLine.useDelimiter(":");
+            String wordIndex = scLine.next();
+            int index = Integer.parseInt(wordIndex);
+            String word = scLine.nextLine();
+            mUnigramCounts.add(index,Integer.parseInt(word.substring(1)));
+        }
     }
 
     private static BufferedReader createBufferReader(String fileName) throws FileNotFoundException {
