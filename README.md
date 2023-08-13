@@ -6,7 +6,6 @@ In this implementation, the model's vocabulary and bigram probabilities are buil
 ## Features
 
 - **Initialization**: Initialize the language model by providing a text corpus file. The model builds a vocabulary index and calculates bigram probabilities to be used for various tasks.
-- 
 - **Word Indexing**: Map words to their corresponding indices in the vocabulary, enabling efficient access and manipulation of vocabulary-related data.
 Bigram Counts: Count the occurrences of word pairs (bigrams) in the text corpus. These counts provide insights into the frequency of word pairs appearing together.
 - **Bigram Probabilities**: Calculate bigram probabilities for word pairs based on their counts. These probabilities indicate the likelihood of a word appearing after another word, allowing the model to make predictions.
